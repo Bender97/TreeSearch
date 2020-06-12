@@ -1,0 +1,3 @@
+/home/fusy/Scrivania/Universita/Computer_Vision_1920/Code/BowTry/bowtry/build/CMakeFiles/rebuild_cache.dir
+/home/fusy/Scrivania/Universita/Computer_Vision_1920/Code/BowTry/bowtry/build/CMakeFiles/BowTry.dir
+/home/fusy/Scrivania/Universita/Computer_Vision_1920/Code/BowTry/bowtry/build/CMakeFiles/edit_cache.dir

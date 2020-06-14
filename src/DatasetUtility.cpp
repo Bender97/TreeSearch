@@ -21,13 +21,12 @@ void buildTrainingSet(string input_images_path, Mat vocabulary, string output_CS
     // push all the images in the general vector together with their class
     for (int i = 0; i < n_tree; i++)
     {
-        images_paths.push_back(pair<string, int>(tree_images_paths[i], TREE_CLASS));
+        images_paths[i] = pair<string, int>(tree_images_paths[i], TREE_CLASS);
     }
     for (int i = 0; i < n_non_tree; i++)
     {
-        images_paths.push_back(pair<string, int>(non_tree_images_paths[i], NON_TREE_CLASS));
+        images_paths[i + n_tree] = pair<string, int>(non_tree_images_paths[i], NON_TREE_CLASS);
     }
-
 
     auto rng = default_random_engine(random_device{}());
     std::shuffle(begin(images_paths), end(images_paths), rng);
@@ -53,9 +52,10 @@ void buildTrainingSet(string input_images_path, Mat vocabulary, string output_CS
         int img_class = images_paths[i].second;
 
         cvtColor(img, img, COLOR_BGR2GRAY);
-
+        
         //Detect SIFT keypoints (or feature points)
         detector->detect(img, keypoints);
+        
         //To store the BoW (or BoF) representation of the image
         Mat histogram;
         //extract BoW (or BoF) descriptor from given image
@@ -70,7 +70,7 @@ void buildTrainingSet(string input_images_path, Mat vocabulary, string output_CS
         {
             addRowCSV(test_set_f, histogram, img_class);
         }
-
+        cout << to_string((int)((float)(i + 1) / n_images * 100)) << "%" << endl;
     }
     
     train_set_f.close();

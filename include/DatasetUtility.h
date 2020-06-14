@@ -18,8 +18,8 @@
 #define TRAINING_SET_DIR "hist_dataset_train.csv"
 #define TEST_SET_DIR "hist_dataset_test.csv"
 
-#define TREE_DIR "/tree"
-#define NON_TREE_DIR "/non_tree"
+#define TREE_DIR "tree/"
+#define NON_TREE_DIR "non_tree/"
 
 using namespace std;
 using namespace cv;

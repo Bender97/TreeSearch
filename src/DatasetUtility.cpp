@@ -92,7 +92,7 @@ pair<Mat, Mat> loadDataset(string dataset_path)
     int n_bags = dataset[0].first.cols;
 
     Mat samples(n_samples, n_bags, dataset[0].first.type());
-    Mat labels(n_samples, 1, CV_8U);
+    Mat labels(n_samples, 1, CV_32SC1);
 
     for (int i = 0; i < n_samples; i++)
     {

@@ -7,45 +7,45 @@
 double trainModel(string train_dataset_path, Ptr<ml::SVM> svm)
 {
     pair<Mat, Mat> dataset = loadDataset(train_dataset_path);
-    cout << dataset.second << endl;
-    /*
-    Mat trainingDataMat(dataset.first);
-    Mat labelsMat(dataset.second);
 
     svm = ml::SVM::create();
     svm->setType(ml::SVM::C_SVC);
     svm->setKernel(ml::SVM::LINEAR);
     svm->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 100, 1e-6));
-    svm->train(trainingDataMat, ml::ROW_SAMPLE, labelsMat);
+    svm->train(dataset.first, ml::ROW_SAMPLE, dataset.second);
 
     int error = 0;
 
-    for (int r=0; r<trainingDataMat.rows; r++) {
-        Mat img = trainingDataMat.row(r);
-        int result = round(svm->predict(img));
-        if (result!=labelsMat.at<uchar>(r))
+    for (int r=0; r<dataset.first.rows; r++) {
+        Mat hist = dataset.first.row(r);
+
+        float response = svm->predict(hist);
+        int result = round(response);
+        cout << "predicted: " << response << " actual: " << (int)dataset.second.at<uchar>(r) << endl;
+        if (result!=dataset.second.at<int>(r))
             error++;
     }
 
-	return (double) error/labelsMat.rows;*/
-    return 0;
+	return (double) error/dataset.second.rows;
 }
 
 double testModel(string test_dataset_path, Ptr<ml::SVM> svm)
 {
     pair<Mat, Mat> dataset = loadDataset(test_dataset_path);
 
-    Mat testDataMat(dataset.first);
-    Mat labelsMat(dataset.second);
     int error = 0;
 
-    for (int r=0; r<testDataMat.rows; r++) {
-        Mat img = testDataMat.row(r);
-        int result = round(svm->predict(img));
-        if (result!=labelsMat.at<uchar>(r))
+    for (int r=0; r<dataset.first.rows; r++) {
+        Mat hist = dataset.first.row(r);
+
+        Mat res;
+        float response = svm->predict(hist);
+        int result = round(response);
+        cout << "predicted: " << response << " actual: " << (int)dataset.second.at<uchar>(r) << endl;
+        if (result!=dataset.second.at<int>(r))
             error++;
     }
 
-    return (double) error/labelsMat.rows;
+    return (double) error/dataset.second.rows;
 
 }

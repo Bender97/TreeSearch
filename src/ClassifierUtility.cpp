@@ -7,7 +7,8 @@
 double trainModel(string train_dataset_path, Ptr<ml::SVM> svm)
 {
     pair<Mat, Mat> dataset = loadDataset(train_dataset_path);
-
+    cout << dataset.second << endl;
+    /*
     Mat trainingDataMat(dataset.first);
     Mat labelsMat(dataset.second);
 
@@ -26,7 +27,8 @@ double trainModel(string train_dataset_path, Ptr<ml::SVM> svm)
             error++;
     }
 
-	return (double) error/labelsMat.rows;
+	return (double) error/labelsMat.rows;*/
+    return 0;
 }
 
 double testModel(string test_dataset_path, Ptr<ml::SVM> svm)

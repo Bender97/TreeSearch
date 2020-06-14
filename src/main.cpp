@@ -190,7 +190,7 @@ int main(int argc, const char* argv[])
     Mat dictionary = createDictionary(samples_path);
     detectTrees(test_path, dictionary);*/
 
-    
+
     
     return 0;
 }

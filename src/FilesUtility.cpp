@@ -29,7 +29,7 @@ ofstream prepareCSV(string path) {
     return file;
 }
 
-bool addRowCSV(ofstream file, Mat histogram, int class_) {
+bool addRowCSV(ofstream& file, Mat histogram, int class_) {
     for (int bin = 0; bin < histogram.cols; bin++) {
         float value = histogram.at<float>(0, bin);
         file << value << ",";
@@ -39,23 +39,19 @@ bool addRowCSV(ofstream file, Mat histogram, int class_) {
     return true;
 }
 
-Ptr<ml::SVM> loadSVMModel(string path) {
-    return Ptr<ml::SVM>();
-}
-
 vector<pair<Mat, int>> readCSV(string path) {
     ifstream fs;
     fs.open(path);
 
     // Make sure the file is open
-    if(!fs.is_open()) throw std::runtime_error("Could not open file");
+    if (!fs.is_open()) throw std::runtime_error("Could not open file");
 
     // each row will be read inside this variable
     string row;
     vector<pair<Mat, int>> result;
 
     // read each row of the CSV
-    while(fs >> row) {
+    while (fs >> row) {
         // stream the row and parse it
         stringstream ss(row);
         string token;   // each cell will be saved here
@@ -65,16 +61,28 @@ vector<pair<Mat, int>> readCSV(string path) {
         while (std::getline(ss, token, ','))
             hist.push_back(stof(token));
 
-        Mat histogram(Size(hist.size()-1, 1), CV_32F);
+        Mat histogram(Size(hist.size() - 1, 1), CV_32F);
 
         // fill the Mat with the histogram values (ignore the last element = class_)
-        for (int i=0; i<hist.size()-1; i++)
+        for (int i = 0; i < hist.size() - 1; i++)
             histogram.at<float>(i) = hist[i];
 
         // extract the class_ value (the last in the vector hist) and cast to int
-        int class_ = (int) (hist[hist.size()-1]);
+        int class_ = (int)(hist[hist.size() - 1]);
 
         result.push_back(pair<Mat, int>(histogram, class_));
     }
     return result;
 }
+
+Ptr<ml::SVM> loadSVMModel(string path) {
+    Ptr<ml::SVM> svm;
+    svm->load(path);
+    return svm;
+}
+
+void writeSVMModel(string path, Ptr<ml::SVM> svm)
+{
+    svm->save(path);
+}
+

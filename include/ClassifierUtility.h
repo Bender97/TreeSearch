@@ -11,6 +11,9 @@
 
 #include "DatasetUtility.h"
 
+#define NON_TREE_CLASS 0
+#define TREE_CLASS 1
+
 using namespace std;
 using namespace cv;
 

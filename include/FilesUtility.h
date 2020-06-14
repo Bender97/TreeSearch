@@ -19,8 +19,9 @@ Mat loadYAML(string path, string key);
 bool writeYAML(string path, string key, Mat table);
 vector<pair<Mat, int>> readCSV(string path);
 ofstream prepareCSV(string path);
-bool addRowCSV(ofstream file, Mat histogram, int class_);
+bool addRowCSV(ofstream& file, Mat histogram, int class_);
 Ptr<ml::SVM> loadSVMModel(string path);
+void writeSVMModel(string path, Ptr<ml::SVM> svm);
 
 
 

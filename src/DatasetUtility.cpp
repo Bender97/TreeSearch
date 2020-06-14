@@ -61,15 +61,19 @@ void buildTrainingSet(string input_images_path, Mat vocabulary, string output_CS
         //extract BoW (or BoF) descriptor from given image
         bowDE.compute(img, keypoints, histogram);
 
-        // insert the first n_images * proportion images into the train set, the rest into the test set
-        if (i < n_images * proportion)
+        if (!histogram.empty())
         {
-            addRowCSV(train_set_f, histogram, img_class);
+            // insert the first n_images * proportion images into the train set, the rest into the test set
+            if (i < n_images * proportion)
+            {
+                addRowCSV(train_set_f, histogram, img_class);
+            }
+            else
+            {
+                addRowCSV(test_set_f, histogram, img_class);
+            }
         }
-        else
-        {
-            addRowCSV(test_set_f, histogram, img_class);
-        }
+
         cout << to_string((int)((float)(i + 1) / n_images * 100)) << "%" << endl;
     }
     

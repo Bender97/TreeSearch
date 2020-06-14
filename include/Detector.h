@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <opencv2/xfeatures2d.hpp>
 #include <opencv2/ml.hpp>
 
 using namespace std;
@@ -15,6 +16,8 @@ using namespace cv;
 
 class Detector {
 public:
+    Mat vocabulary;
+    Ptr<ml::SVM> classifier;
     void setVocabulary(Mat vocabulary);
     void setClassifier(Ptr<ml::SVM> classifier);
     Mat detectTrees(Mat img);

@@ -9,5 +9,8 @@ using namespace std;
 
 int main(int args, char ** argv) {
     cout << "Hello World" << endl;
+
+    storeVocabulary("../vocabulary_dataset/", "prova.yml");
+
     return 0;
 }

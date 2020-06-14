@@ -9,5 +9,7 @@ using namespace std;
 
 int main(int args, char ** argv) {
     cout << "Hello World" << endl;
+    Ptr<ml::SVM> svm;
+    trainModel("/home/fusy/Scrivania/Universita/Computer_Vision_1920/Code/BoF/dataset.csv", svm);
     return 0;
 }

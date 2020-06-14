@@ -7,8 +7,11 @@
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <opencv2/xfeatures2d.hpp>
 #include "../include/ImagesUtility.h"
 #include "../include/FilesUtility.h"
+
+#define DEFAULT_KEY "vocabulary"
 
 using namespace std;
 using namespace cv;
@@ -16,8 +19,8 @@ using namespace cv;
 #define DEFAULT_BAGS 200
 
 
-bool storeVocabulary(string path_imgs, string voc, int n_bags);
-bool storeVocabulary(string path_imgs, string voc);
+bool storeVocabulary(string path_imgs, string path_voc, int n_bags);
+bool storeVocabulary(string path_imgs, string path_voc);
 Mat makeVocabulary(string path_imgs, int n_bags);
 Mat makeVocabulary(string path_imgs);
 

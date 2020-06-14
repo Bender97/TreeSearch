@@ -4,7 +4,7 @@
 
 #include "../include/FilesUtility.h"
 
-Mat FilesUtility::loadYAML(string path, string key) {
+Mat loadYAML(string path, string key) {
     Mat obj;
     FileStorage fs(path, FileStorage::READ);
     if (!fs.isOpened()) {
@@ -16,20 +16,20 @@ Mat FilesUtility::loadYAML(string path, string key) {
     return obj;
 }
 
-bool FilesUtility::writeYAML(string path, string key, Mat table) {
+bool writeYAML(string path, string key, Mat table) {
     FileStorage fs(path, FileStorage::WRITE);
     fs << key << table;
     fs.release();
     return true;
 }
 
-ofstream FilesUtility::prepareCSV(string path) {
+ofstream prepareCSV(string path) {
     ofstream file;
     file.open(path);
     return file;
 }
 
-bool FilesUtility::addRowCSV(ofstream file, Mat histogram, int class_) {
+bool addRowCSV(ofstream file, Mat histogram, int class_) {
     for (int bin = 0; bin < histogram.cols; bin++) {
         float value = histogram.at<float>(0, bin);
         file << value << ",";
@@ -39,11 +39,11 @@ bool FilesUtility::addRowCSV(ofstream file, Mat histogram, int class_) {
     return true;
 }
 
-Ptr<ml::SVM> FilesUtility::loadSVMModel(string path) {
+Ptr<ml::SVM> loadSVMModel(string path) {
     return Ptr<ml::SVM>();
 }
 
-vector<pair<Mat, int>> FilesUtility::readCSV(string path) {
+vector<pair<Mat, int>> readCSV(string path) {
     ifstream fs;
     fs.open(path);
 

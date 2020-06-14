@@ -9,6 +9,7 @@
 
 #include "../include/FilesUtility.h"
 #include "../include/ImagesUtility.h"
+#include "../include/VocabularyUtility.h"
 
 using namespace std;
 using namespace cv;
@@ -188,6 +189,8 @@ int main(int argc, const char* argv[])
 
     Mat dictionary = createDictionary(samples_path);
     detectTrees(test_path, dictionary);*/
+
+    
     
     return 0;
 }

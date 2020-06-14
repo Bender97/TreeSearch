@@ -4,7 +4,7 @@
 
 #include "../include/ImagesUtility.h"
 
-vector<string> ImagesUtility::loadImagesPaths(string path) {
+vector<string> loadImagesPaths(string path) {
 
     vector<string> filenames;   // vector of all the filenames found in the specified folder
     vector<string> allowedExtensions = { ".jpg", ".jpeg", ".JPG", ".png", ".bmp" };    // allowed extensions for images
@@ -29,11 +29,11 @@ vector<string> ImagesUtility::loadImagesPaths(string path) {
     return filenames;
 }
 
-Mat ImagesUtility::loadImage(string path) {
+Mat loadImage(string path) {
     return imread(path);
 }
 
-bool ImagesUtility::storeImage(string path, Mat img) {
+bool storeImage(string path, Mat img) {
     return imwrite(path, img);
 }
 

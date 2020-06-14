@@ -191,7 +191,7 @@ int main(int argc, const char* argv[])
     FilesUtility fu;
     vector<pair<Mat, int>> ds = fu.readCSV("dataset.csv");
     for(pair<Mat, int> couple:ds) {
-        cout << couple.first << endl;
+        cout << couple.second << endl;
     }
 
     return 0;

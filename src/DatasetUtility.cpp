@@ -81,5 +81,24 @@ void buildTrainingSet(string input_images_path, Mat vocabulary, string output_CS
 
 pair<Mat, Mat> loadDataset(string dataset_path)
 {
-	return pair<Mat, Mat>();
+
+    vector<pair<Mat, int>> dataset = readCSV(dataset_path);
+
+    int n_samples = dataset.size();
+    int n_bags = dataset[0].first.cols;
+
+    Mat samples(Size(n_samples, n_bags), dataset[0].first.type());
+    Mat labels(Size(n_samples, 1), CV_8U);
+
+    for (int i = 0; i < n_samples; i++)
+    {
+        // select a row of the matrix and copy it to the samples matrix
+        Rect row(i, 0, n_samples, 1);
+        dataset[i].first.copyTo(samples(row));
+        // copy the class to the labels matrix
+        labels.at<uchar>(i) = dataset[i].second;
+        
+    }
+
+	return pair<Mat, Mat>(samples, labels);
 }

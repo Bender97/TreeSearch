@@ -87,16 +87,16 @@ pair<Mat, Mat> loadDataset(string dataset_path)
     int n_samples = (int)dataset.size();
     int n_bags = dataset[0].first.cols;
 
-    Mat samples(Size(n_samples, n_bags), dataset[0].first.type());
-    Mat labels(Size(n_samples, 1), CV_8U);
+    Mat samples(n_samples, n_bags, dataset[0].first.type());
+    Mat labels(n_samples, 1, CV_8U);
 
     for (int i = 0; i < n_samples; i++)
     {
         // select a row of the matrix and copy it to the samples matrix
-        Rect row(i, 0, 1, n_bags);
+        Rect row(0, i, n_bags, 1);
         dataset[i].first.copyTo(samples(row));
         // copy the class to the labels matrix
-        labels.at<uchar>(i) = dataset[i].second;
+        labels.at<uchar>(0, i) = dataset[i].second;
         
     }
 

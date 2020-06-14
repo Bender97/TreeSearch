@@ -15,12 +15,12 @@
 using namespace std;
 using namespace cv;
 
-static Mat loadYAML(string path, string key);
-static bool writeYAML(string path, string key, Mat table);
-static vector<pair<Mat, int>> readCSV(string path);
-static ofstream prepareCSV(string path);
-static bool addRowCSV(ofstream file, Mat histogram, int class_);
-static Ptr<ml::SVM> loadSVMModel(string path);
+Mat loadYAML(string path, string key);
+bool writeYAML(string path, string key, Mat table);
+vector<pair<Mat, int>> readCSV(string path);
+ofstream prepareCSV(string path);
+bool addRowCSV(ofstream file, Mat histogram, int class_);
+Ptr<ml::SVM> loadSVMModel(string path);
 
 
 

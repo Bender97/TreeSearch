@@ -12,8 +12,8 @@ using namespace std;
 using namespace cv;
 
 
-static vector<string> loadImagesPaths(string path);
-static Mat loadImage(string path);
-static bool storeImage(string path, Mat img);
+vector<string> loadImagesPaths(string path);
+Mat loadImage(string path);
+bool storeImage(string path, Mat img);
 
 #endif //BOF_IMAGESUTILITY_H

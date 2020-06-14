@@ -11,9 +11,9 @@ using namespace std;
 int main(int args, char ** argv)
 {
     
-    string dataset_images_path = "../../train_dataset_images/";
-    string vocabulary_path = "../../cmake-build-debug/vocabulary.yml";
-    string dataset_csv_path = "../../cmake-build-debug/";
+    string dataset_images_path = "../train_dataset_images/";
+    string vocabulary_path = "vocabulary.yml";
+    string dataset_csv_path = "";
     float proportion = 0.8;
 
     Mat vocabulary = loadYAML(vocabulary_path, DEFAULT_KEY);

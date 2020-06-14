@@ -19,7 +19,7 @@ public:
     Mat vocabulary;
     Ptr<ml::SVM> classifier;
     void setVocabulary(Mat vocabulary);
-    void setClassifier(Ptr<ml::SVM> classifier);
+    void setClassifier(Ptr<ml::SVM> &classifier);
     Mat detectTrees(Mat img);
 };
 

@@ -8,7 +8,7 @@ void Detector::setVocabulary(Mat vocabulary) {
     this->vocabulary = vocabulary;
 }
 
-void Detector::setClassifier(Ptr<ml::SVM> classifier) {
+void Detector::setClassifier(Ptr<ml::SVM> &classifier) {
     this->classifier = classifier;
 }
 
@@ -27,7 +27,7 @@ Mat Detector::detectTrees(Mat img) {
     vector<KeyPoint> keypoints;
 
     int min_size = min(img.rows, img.cols);
-    int step = 50;
+    int step = 100;
 
     for (int scale = 1; scale < 5; scale++) {
         int w_size = min_size / scale;
@@ -44,10 +44,26 @@ Mat Detector::detectTrees(Mat img) {
 
                 bowDE.compute(img, keypoints, histogram);
 
-                int response = (int) this->classifier->predict(histogram);
+                Mat canvas = img.clone();
 
-                if (response == 1)
-                    rectangle(img, window, { 0, 0, 255 });
+                rectangle(canvas, window, { 0, 0, 255 });
+
+                while (canvas.cols > 800 || canvas.rows > 600)
+                    resize(canvas, canvas, Size(canvas.cols / 2, canvas.rows / 2));
+
+                imshow("Window", canvas);
+
+                waitKey(1);
+
+                if (!histogram.empty()) {
+
+                    int response = (int) this->classifier->predict(histogram);
+
+                    if (response == 1) {
+                        rectangle(img, window, {0, 0, 255}, scale);
+                        cout << "Te go visto nassare" << endl;
+                    }
+                }
             }
         }
 

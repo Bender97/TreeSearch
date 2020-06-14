@@ -17,7 +17,7 @@
 using namespace std;
 using namespace cv;
 
-double trainModel(string train_dataset_path, Ptr<ml::SVM> svm);
+double trainModel(string train_dataset_path, Ptr<ml::SVM> & svm);
 double testModel (string test_dataset_path,  Ptr<ml::SVM> svm);
 
 

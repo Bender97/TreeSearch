@@ -12,12 +12,10 @@
 #include "../include/FilesUtility.h"
 
 #define DEFAULT_KEY "vocabulary"
+#define DEFAULT_BAGS 200
 
 using namespace std;
 using namespace cv;
-
-#define DEFAULT_BAGS 200
-
 
 bool storeVocabulary(string path_imgs, string path_voc, int n_bags);
 bool storeVocabulary(string path_imgs, string path_voc);

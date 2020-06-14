@@ -8,26 +8,42 @@ double trainModel(string train_dataset_path, Ptr<ml::SVM> &svm)
 {
     pair<Mat, Mat> dataset = loadDataset(train_dataset_path);
 
+    Ptr<ml::TrainData> td = ml::TrainData::create(dataset.first, ml::ROW_SAMPLE, dataset.second);
+
+
+/*    // k-fold cross validation
+    int kFolds = 10;
+
+    ml::ParamGrid * C = new ml::ParamGrid();
+    ml::ParamGrid * p = new ml::ParamGrid();
+    ml::ParamGrid * nu = new ml::ParamGrid();
+    ml::ParamGrid * gamma = new ml::ParamGrid();
+    ml::ParamGrid * coeff = new ml::ParamGrid();
+    ml::ParamGrid * degree = new ml::ParamGrid();
+    (*gamma).(0.0);*/
+
     svm = ml::SVM::create();
     svm->setType(ml::SVM::NU_SVC);
     svm->setNu(0.5);
     svm->setKernel(ml::SVM::RBF);
 
     svm->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 100000, 1e-6));
-    svm->train(dataset.first, ml::ROW_SAMPLE, dataset.second);
-
+//    svm->train(dataset.first, ml::ROW_SAMPLE, dataset.second);
+    svm->trainAuto(td);
     int error = 0;
 
     for (int r=0; r<dataset.first.rows; r++) {
         Mat hist = dataset.first.row(r);
 
-        float response = svm->predict(hist);
+        int response = svm->predict(hist);
         int result = round(response);
-        cout << "predicted: " << response << " actual: " << (int)dataset.second.at<uchar>(r) << endl;
+        cout << "predicted: " << response << " actual: " << (int)dataset.second.at<int>(r) << endl;
         if (result!=dataset.second.at<int>(r))
             error++;
     }
-
+    Mat resp;
+    cout << "calcError: " << svm->calcError(td, 0, resp) << endl;
+    cout << "error: " << error << endl;
 	return (double) error/dataset.second.rows;
 }
 
@@ -42,7 +58,7 @@ double testModel(string test_dataset_path, Ptr<ml::SVM> svm)
 
         float response = svm->predict(hist);
         int result = round(response);
-        //cout << "predicted: " << response << " actual: " << (int)dataset.second.at<uchar>(r) << endl;
+        cout << "predicted: " << response << " actual: " << (int)dataset.second.at<int>(r) << endl;
         if (result!=dataset.second.at<int>(r))
             error++;
     }

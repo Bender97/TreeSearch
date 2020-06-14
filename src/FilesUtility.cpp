@@ -75,10 +75,8 @@ vector<pair<Mat, int>> readCSV(string path) {
     return result;
 }
 
-Ptr<ml::SVM> loadSVMModel(string path) {
-    Ptr<ml::SVM> svm;
+void loadSVMModel(string path, Ptr<ml::SVM> &svm) {
     svm->load(path);
-    return svm;
 }
 
 void writeSVMModel(string path, Ptr<ml::SVM> svm)

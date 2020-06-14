@@ -11,8 +11,8 @@ void buildTrainingSet(string input_images_path, Mat vocabulary, string output_CS
 	vector<string> tree_images_paths = loadImagesPaths(input_images_path + TREE_DIR);
     vector<string> non_tree_images_paths = loadImagesPaths(input_images_path + NON_TREE_DIR);
 
-    int n_tree = tree_images_paths.size();
-    int n_non_tree = non_tree_images_paths.size();
+    int n_tree = (int)tree_images_paths.size();
+    int n_non_tree = (int)non_tree_images_paths.size();
 
     int n_images = n_tree + n_non_tree;
 
@@ -28,8 +28,8 @@ void buildTrainingSet(string input_images_path, Mat vocabulary, string output_CS
         images_paths.push_back(pair<string, int>(non_tree_images_paths[i], NON_TREE_CLASS));
     }
 
-    auto rd = std::random_device{};
-    auto rng = std::default_random_engine{ rd() };
+
+    auto rng = default_random_engine(random_device{}());
     std::shuffle(begin(images_paths), end(images_paths), rng);
 
     //create a nearest neighbor matcher
@@ -84,7 +84,7 @@ pair<Mat, Mat> loadDataset(string dataset_path)
 
     vector<pair<Mat, int>> dataset = readCSV(dataset_path);
 
-    int n_samples = dataset.size();
+    int n_samples = (int)dataset.size();
     int n_bags = dataset[0].first.cols;
 
     Mat samples(Size(n_samples, n_bags), dataset[0].first.type());

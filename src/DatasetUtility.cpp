@@ -100,7 +100,7 @@ pair<Mat, Mat> loadDataset(string dataset_path)
         Rect row(0, i, n_bags, 1);
         dataset[i].first.copyTo(samples(row));
         // copy the class to the labels matrix
-        labels.at<uchar>(0, i) = dataset[i].second;
+        labels.at<int>(0, i) = dataset[i].second;
         
     }
 

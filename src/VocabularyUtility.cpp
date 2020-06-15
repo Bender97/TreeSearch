@@ -7,6 +7,7 @@
 bool storeVocabulary(string path_imgs, string path_voc, int n_bags) {
 
     writeYAML(path_voc, DEFAULT_KEY, makeVocabulary(path_imgs, n_bags));
+    cout << "Vocabulary written to " << path_voc << endl;
     return true;
 }
 
@@ -42,7 +43,7 @@ Mat makeVocabulary(string path_imgs, int n_bags) {
         //put the all feature descriptors in a single Mat object
         featuresUnclustered.push_back(descriptor);
         //print the progressm
-        cout << "step " << i << "/" << sample_imgs.size() << " completed" << endl;
+        cout << "step " << to_string(i + 1) << "/" << sample_imgs.size() << " completed" << endl;
     }
 
     //Construct BOWKMeansTrainer
@@ -56,9 +57,12 @@ Mat makeVocabulary(string path_imgs, int n_bags) {
     int flags = KMEANS_PP_CENTERS;
     //Create the BoW (or BoF) trainer
     BOWKMeansTrainer bowTrainer(dictionarySize, tc, retries, flags);
+
+    cout << "Starting k-means clustering process" << endl;
     //cluster the feature vectors
     Mat dictionary = bowTrainer.cluster(featuresUnclustered);
 
+    cout << "Clustering process completed" << endl;
     return dictionary;
 }
 Mat makeVocabulary(string path_imgs) {

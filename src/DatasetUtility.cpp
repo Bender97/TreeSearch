@@ -74,7 +74,7 @@ void buildTrainingSet(string input_images_path, Mat vocabulary, string output_CS
             }
         }
 
-        cout << to_string((int)((float)(i + 1) / n_images * 100)) << "%" << endl;
+        cout << "Done: " << to_string(i+1) << "/" << n_images << " " << to_string((int)((float)(i + 1) / n_images * 100)) << "%" << endl;
     }
     
     train_set_f.close();

@@ -47,7 +47,7 @@ Mat makeVocabulary(string path_imgs, int n_bags) {
 
     //Construct BOWKMeansTrainer
     //the number of bags
-    int dictionarySize = 200;
+    int dictionarySize = n_bags;
     //define Term Criteria
     TermCriteria tc(TermCriteria::Type::MAX_ITER, 100, 0.001);
     //retries number

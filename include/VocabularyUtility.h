@@ -12,7 +12,7 @@
 #include "../include/FilesUtility.h"
 
 #define DEFAULT_KEY "vocabulary"
-#define DEFAULT_BAGS 200
+#define DEFAULT_BAGS 2000
 
 using namespace std;
 using namespace cv;

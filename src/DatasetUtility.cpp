@@ -11,6 +11,9 @@ void buildTrainingSet(string input_images_path, Mat vocabulary, string output_CS
 	vector<string> tree_images_paths = loadImagesPaths(input_images_path + TREE_DIR);
     vector<string> non_tree_images_paths = loadImagesPaths(input_images_path + NON_TREE_DIR);
 
+    cout << "tree images: " << tree_images_paths.size() << endl;
+    cout << "non tree images: " << non_tree_images_paths.size() << endl;
+
     int n_tree = (int)tree_images_paths.size();
     int n_non_tree = (int)non_tree_images_paths.size();
 
@@ -32,7 +35,8 @@ void buildTrainingSet(string input_images_path, Mat vocabulary, string output_CS
     std::shuffle(begin(images_paths), end(images_paths), rng);
 
     //create a nearest neighbor matcher
-    Ptr<DescriptorMatcher> matcher(new FlannBasedMatcher);
+    //Ptr<DescriptorMatcher> matcher(new FlannBasedMatcher);
+    Ptr<DescriptorMatcher> matcher = BFMatcher::create(NORM_L2);
     //create Sift feature point detector
     Ptr<xfeatures2d::SIFT> detector = xfeatures2d::SIFT::create();
     //create BoF (or BoW) descriptor extractor
@@ -46,31 +50,56 @@ void buildTrainingSet(string input_images_path, Mat vocabulary, string output_CS
     //To store the keypoints that will be extracted by SIFT
     vector<KeyPoint> keypoints;
 
+    Rect window[10];
+
     for (int i = 0; i < n_images; i++)
     {
         Mat img = imread(images_paths[i].first);
         int img_class = images_paths[i].second;
 
-        cvtColor(img, img, COLOR_BGR2GRAY);
-        
-        //Detect SIFT keypoints (or feature points)
-        detector->detect(img, keypoints);
-        
-        //To store the BoW (or BoF) representation of the image
-        Mat histogram;
-        //extract BoW (or BoF) descriptor from given image
-        bowDE.compute(img, keypoints, histogram);
+        int width = img.cols/3;
+        int height = img.rows/2;
 
-        if (!histogram.empty())
-        {
-            // insert the first n_images * proportion images into the train set, the rest into the test set
-            if (i < n_images * proportion)
-            {
-                addRowCSV(train_set_f, histogram, img_class);
+        window[0] = Rect(0, 0, img.cols, img.rows);
+        window[1] = Rect(0, 0, width, height);
+        window[2] = Rect(width, 0, width, height);
+        window[3] = Rect(width*2, 0, width, height);
+        window[4] = Rect(0, height, width, height);
+        window[5] = Rect(width, height, width, height);
+        window[6] = Rect(width*2, height, width, height);
+
+
+        //To store the BoW (or BoF) representation of the image
+        Mat histogram[7];
+
+        cvtColor(img, img, COLOR_BGR2GRAY);
+
+        bool flag = false;
+
+        for (int w=1; w<7; w++) {
+            //Detect SIFT keypoints (or feature points)
+            detector->detect(img(window[w]), keypoints);
+
+            //extract BoW (or BoF) descriptor from given image
+            bowDE.compute(img(window[w]), keypoints, histogram[w]);
+            if (histogram[w].empty()) {
+                //histogram[w] = Mat::zeros(1, 200, CV_32F);
+                w = 20;
+                flag = true;
             }
-            else
-            {
-                addRowCSV(test_set_f, histogram, img_class);
+        }
+        if (!flag) {
+            Mat tot_desc(1, 200*6, CV_32F);
+
+            for (int w=1; w<7; w++) {
+                histogram[w].copyTo(tot_desc(Rect((w-1)*200, 0, 200, 1)));
+            }
+
+            // insert the first n_images * proportion images into the train set, the rest into the test set
+            if (i < n_images * proportion) {
+                addRowCSV(train_set_f, tot_desc, img_class);
+            } else {
+                addRowCSV(test_set_f, tot_desc, img_class);
             }
         }
 
@@ -79,8 +108,6 @@ void buildTrainingSet(string input_images_path, Mat vocabulary, string output_CS
     
     train_set_f.close();
     test_set_f.close();
-
-
 }
 
 pair<Mat, Mat> loadDataset(string dataset_path)

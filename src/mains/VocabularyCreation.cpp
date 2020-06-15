@@ -10,7 +10,7 @@ using namespace std;
 int main(int args, char ** argv) {
     cout << "Hello World" << endl;
 
-    storeVocabulary("../vocabulary_dataset/", "prova.yml");
+    storeVocabulary("../vocabulary_dataset/", "vocabulary_200.yml", 200);
 
     return 0;
 }

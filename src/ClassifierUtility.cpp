@@ -10,21 +10,9 @@ double trainModel(string train_dataset_path, Ptr<ml::SVM> &svm)
 
     Ptr<ml::TrainData> td = ml::TrainData::create(dataset.first, ml::ROW_SAMPLE, dataset.second);
 
-
-/*    // k-fold cross validation
-    int kFolds = 10;
-
-    ml::ParamGrid * C = new ml::ParamGrid();
-    ml::ParamGrid * p = new ml::ParamGrid();
-    ml::ParamGrid * nu = new ml::ParamGrid();
-    ml::ParamGrid * gamma = new ml::ParamGrid();
-    ml::ParamGrid * coeff = new ml::ParamGrid();
-    ml::ParamGrid * degree = new ml::ParamGrid();
-    (*gamma).(0.0);*/
-
     svm = ml::SVM::create();
     svm->setType(ml::SVM::NU_SVC);
-    svm->setNu(0.5);
+    svm->setNu(0.95);
     svm->setKernel(ml::SVM::RBF);
 
     svm->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 100000, 1e-6));
@@ -37,7 +25,7 @@ double trainModel(string train_dataset_path, Ptr<ml::SVM> &svm)
 
         int response = svm->predict(hist);
         int result = round(response);
-        cout << "predicted: " << response << " actual: " << (int)dataset.second.at<int>(r) << endl;
+//        cout << "predicted: " << response << " actual: " << (int)dataset.second.at<int>(r) << endl;
         if (result!=dataset.second.at<int>(r))
             error++;
     }
@@ -58,7 +46,7 @@ double testModel(string test_dataset_path, Ptr<ml::SVM> svm)
 
         float response = svm->predict(hist);
         int result = round(response);
-        cout << "predicted: " << response << " actual: " << (int)dataset.second.at<int>(r) << endl;
+//        cout << "predicted: " << response << " actual: " << (int)dataset.second.at<int>(r) << endl;
         if (result!=dataset.second.at<int>(r))
             error++;
     }

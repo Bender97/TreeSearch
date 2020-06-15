@@ -12,7 +12,7 @@ int main(int args, char ** argv)
 {
     
     string dataset_images_path = "../train_dataset_images/";
-    string vocabulary_path = "vocabulary.yml";
+    string vocabulary_path = "vocabulary_200.yml";
     string dataset_csv_path = "";
     float proportion = 0.8;
 

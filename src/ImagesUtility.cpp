@@ -37,4 +37,32 @@ bool storeImage(string path, Mat img) {
     return imwrite(path, img);
 }
 
+vector<Rect> getWindows(Mat img, int rows, int cols){
 
+    vector<Rect> windows = vector<Rect>(rows*cols+1);
+    windows[0] = Rect(0, 0, img.cols, img.rows);
+
+    int width = img.cols/cols;
+    int height = img.rows/rows;
+
+    for (int r=0; r<rows; r++)
+        for (int c=0; c<cols; c++)
+            windows[r*cols + c +1] = Rect(c*width, r*height, width, height);
+
+    return windows;
+}
+
+vector<Rect> getFrames(Mat img, int rows, int cols, int x, int y, int w_size){
+
+    vector<Rect> windows = vector<Rect>(rows*cols+1);
+    windows[0] = Rect(x, y, w_size, w_size);
+
+    int width = w_size/cols;
+    int height = w_size/rows;
+
+    for (int r=0; r<rows; r++)
+        for (int c=0; c<cols; c++)
+            windows[r*cols + c +1] = Rect(x + c*width, y + r*height, width, height);
+
+    return windows;
+}

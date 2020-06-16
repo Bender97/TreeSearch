@@ -31,7 +31,15 @@ Mat Detector::detectTrees(Mat img) {
     int min_size = min(img.rows, img.cols);
     int step = 10;
 
-    Rect window[7];
+    /*** WINDOWING PARAMETERS ***/
+    int rows = 2;
+    int cols = 3;
+    int exclude_big_image = 1; // 1 true, 0 false [include also full image histogram computation]
+    /*** VOCABULARY PARAMETERS ***/
+    int num_bins = vocabulary.rows;
+
+    vector<Rect> windows;
+    Mat histogram[rows*cols + 1];
 
     for (int scale = 1; scale < 5; scale++) {
         int w_size = min_size / scale;
@@ -39,45 +47,33 @@ Mat Detector::detectTrees(Mat img) {
         for (int x = 0; x <= img.cols - w_size; x += step) {
             for (int y = 0; y <= img.rows - w_size; y += step) {
 
-                int width = w_size/3;
-                int height = w_size/2;
-
-                window[0] = Rect(x, y, w_size, w_size);
-                window[1] = Rect(0, 0, width, height);
-                window[2] = Rect(width, 0, width, height);
-                window[3] = Rect(width*2, 0, width, height);
-                window[4] = Rect(0, height, width, height);
-                window[5] = Rect(width, height, width, height);
-                window[6] = Rect(width*2, height, width, height);
-
-                //To store the BoW (or BoF) representation of the image
-                Mat histogram[7];
+                windows = getFrames(img, rows, cols, x, y, w_size);
 
                 bool flag = false;
 
-                for (int w=1; w<7; w++) {
+                for (int w=exclude_big_image; w<windows.size(); w++) {
                     //Detect SIFT keypoints (or feature points)
-                    detector->detect(img(window[w]), keypoints);
+                    detector->detect(img(windows[w]), keypoints);
 
                     //extract BoW (or BoF) descriptor from given image
-                    bowDE.compute(img(window[w]), keypoints, histogram[w]);
+                    bowDE.compute(img(windows[w]), keypoints, histogram[w]);
                     if (histogram[w].empty()) {
-                        histogram[w] = Mat::zeros(1, 200, CV_32F);
-                        //flag = true;
-                        //w = 20;
+                        //histogram[w] = Mat::zeros(1, 200, CV_32F);
+                        w = windows.size();
+                        flag = true;
                     }
                 }
                 if (!flag) {
-                    Mat tot_desc(1, 200*6, histogram[1].type());
+                    Mat tot_desc(1, num_bins*(windows.size()-exclude_big_image), CV_32F);
 
-                    for (int w=1; w<7; w++) {
-                        histogram[w].copyTo(tot_desc(Rect((w-1)*200, 0, 200, 1)));
+                    for (int w=exclude_big_image; w<windows.size(); w++) {
+                        histogram[w].copyTo(tot_desc(Rect((w-exclude_big_image)*num_bins, 0, num_bins, 1)));
                     }
                     int response = (int) this->classifier->predict(tot_desc);
 
                     cout << x << "." << y << " result: " << response << endl;
                     if (response == 1) {
-                        rectangle(result, window[0], {255, 0, 255}, scale);
+                        rectangle(result, windows[0], {255, 0, 255}, scale);
                         //circle(result, Point(x+w_size/2, y+w_size/2), 5, (255, 0, 0), -1);
                         cout << "Te go visto nassare" << endl;
                     }
@@ -88,7 +84,7 @@ Mat Detector::detectTrees(Mat img) {
 
 //                rectangle(canvas, window[0], { 0, 0, 255 }, 1);
                 //circle(result, Point(x+w_size/2, y+w_size/2), 5, Scalar::all(-1));
-                rectangle(canvas, window[0], { 0, 0, 255 });
+                rectangle(canvas, windows[0], { 0, 0, 255 });
 
                 while (canvas.cols > 1500 || canvas.rows > 1000)
                     resize(canvas, canvas, Size(canvas.cols / 2, canvas.rows / 2));

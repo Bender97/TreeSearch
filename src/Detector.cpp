@@ -75,7 +75,6 @@ Mat Detector::detectTrees(Mat img) {
                     cout << x << "." << y << " result: " << response << endl;
                     if (response == 1) {
                         rectangle(result, windows[0], {255, 0, 255}, scale);
-                        //circle(result, Point(x+w_size/2, y+w_size/2), 5, (255, 0, 0), -1);
                         cout << "Te go visto nassare" << endl;
                     }
                 }
@@ -83,8 +82,6 @@ Mat Detector::detectTrees(Mat img) {
 
                 Mat canvas = result.clone();
 
-//                rectangle(canvas, window[0], { 0, 0, 255 }, 1);
-                //circle(result, Point(x+w_size/2, y+w_size/2), 5, Scalar::all(-1));
                 rectangle(canvas, windows[0], { 0, 0, 255 });
 
                 while (canvas.cols > 1500 || canvas.rows > 1000)

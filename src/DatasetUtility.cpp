@@ -58,7 +58,7 @@ void buildTrainingSet(string input_images_path, Mat vocabulary, string output_CS
     int num_bins = vocabulary.rows;
 
     vector<Rect> windows;
-    Mat histogram[rows*cols + 1];
+    vector<Mat> histogram(rows*cols + 1);
 
     for (int i = 0; i < n_images; i++)
     {

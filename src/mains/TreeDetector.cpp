@@ -6,21 +6,43 @@
 using namespace std;
 
 #include "../../include/VocabularyUtility.h"
-#include "../../include/FilesUtility.h"
 #include "../../include/Detector.h"
 
 int main(int args, char ** argv) {
-    cout << "Hello World" << endl;
-    Detector conan;
-    conan.setVocabulary(loadYAML("/home/fusy/Scrivania/Universita/Computer_Vision_1920/Code/BoF/cmake-build-debug/vocabulary_200.yml", DEFAULT_KEY));
 
-    Ptr<ml::SVM> svm = ml::SVM::load("/home/fusy/Scrivania/Universita/Computer_Vision_1920/Code/BoF/cmake-build-debug/svmModel.yml");
-    cout << svm->isTrained() << endl;
-    conan.setClassifier(svm);
-    Mat img = loadImage("/home/fusy/Scrivania/Universita/Computer_Vision_1920/Code/BoF/Benchmark_step_1/Figure 1.jpg");
+    if (args<4) {
+        cout << "usage: vocabulary_path svm_path img_path";
+        return 1;
+    }
+
+    string vocabulary_path = argv[1];
+    string svm_path = argv[2];
+    string img_path = argv[3];
+
+    Detector detector;
+    detector.setVocabulary(loadYAML(vocabulary_path, DEFAULT_KEY));
+
+    Ptr<ml::SVM> svm = ml::SVM::load(svm_path);
+
+    if (svm->empty() || !svm->isTrained()) {
+        cout << "problem loading svmModel provided with path:" << endl << svm_path << endl;
+        return 1;
+    }
+
+    detector.setClassifier(svm);
+    Mat img = loadImage(img_path);
+
+    if (img.empty()) {
+        cout << "error loading image" << endl;
+        return 1;
+    }
+
+    /*** RESIZE IMAGE (if needed): faster computation and better visualization ***/
     while (img.cols > 800 || img.rows > 600)
         resize(img, img, Size(img.cols / 2, img.rows / 2));
-    Mat res = conan.detectTrees(img);
+
+
+    Mat res = detector.detectTrees(img);
 
     imshow("res", res);
     waitKey(0);

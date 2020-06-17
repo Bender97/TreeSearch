@@ -10,11 +10,16 @@ using namespace std;
 
 int main(int args, char ** argv)
 {
-    
-    string dataset_images_path = "../train_dataset_images/";
-    string vocabulary_path = "vocabulary_200.yml";
-    string dataset_csv_path = "";
-    float proportion = 0.8;
+    if (args<5) {
+        cout << "usage: dataset_images_path vocabulary_path dataset_csv_path proportion";
+        return 1;
+    }
+
+    string dataset_images_path = argv[1];
+    string vocabulary_path = argv[2];
+    string dataset_csv_path = argv[3];
+
+    float proportion = stof(argv[4]);
 
     Mat vocabulary = loadYAML(vocabulary_path, DEFAULT_KEY);
 

@@ -40,7 +40,7 @@ Mat Detector::detectTrees(Mat img) {
     int num_bins = vocabulary.rows;
 
     vector<Rect> windows;
-    Mat histogram[rows*cols + 1];
+    vector<Mat> histogram(rows*cols + 1);
 
     for (int scale = 1; scale < 5; scale++) {
         int w_size = min_size / scale;

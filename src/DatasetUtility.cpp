@@ -65,38 +65,83 @@ void buildTrainingSet(string input_images_path, Mat vocabulary, string output_CS
         Mat img = imread(images_paths[i].first);
         int img_class = images_paths[i].second;
 
-        windows = getWindows(img, rows, cols);
+        int min_size = min(img.rows, img.cols);
+        int step = min_size/3;
 
-        //To store the BoW (or BoF) representation of the image
+        if (img_class == 0) {
+            for (int scale = 1; scale < 2; scale++) {
+                int w_size = min_size / scale;
 
-        cvtColor(img, img, COLOR_BGR2GRAY);
+                for (int x = 0; x <= img.cols - w_size; x += step) {
+                    for (int y = 0; y <= img.rows - w_size; y += step) {
 
-        bool flag = false;
+                        windows = getFrames(img, rows, cols, x, y, w_size);
+                        bool flag = false;
 
-        for (int w=exclude_big_image; w<windows.size(); w++) {
-            //Detect SIFT keypoints (or feature points)
-            detector->detect(img(windows[w]), keypoints);
+                        for (int w=exclude_big_image; w<windows.size(); w++) {
+                            //Detect SIFT keypoints (or feature points)
+                            detector->detect(img(windows[w]), keypoints);
 
-            //extract BoW (or BoF) descriptor from given image
-            bowDE.compute(img(windows[w]), keypoints, histogram[w]);
-            if (histogram[w].empty()) {
-                //histogram[w] = Mat::zeros(1, 200, CV_32F);
-                w = windows.size();
-                flag = true;
+                            //extract BoW (or BoF) descriptor from given image
+                            bowDE.compute(img(windows[w]), keypoints, histogram[w]);
+                            if (histogram[w].empty()) {
+                                histogram[w] = Mat::zeros(1, num_bins, CV_32F);
+                                /*w = windows.size();
+                                flag = true;*/
+                            }
+                        }
+                        if (!flag) {
+                            Mat tot_desc(1, num_bins*(windows.size()-exclude_big_image), CV_32F);
+
+                            for (int w=exclude_big_image; w<windows.size(); w++) {
+                                histogram[w].copyTo(tot_desc(Rect((w-exclude_big_image)*num_bins, 0, num_bins, 1)));
+                            }
+
+                            // insert the first n_images * proportion images into the train set, the rest into the test set
+                            if (i < n_images * proportion) {
+                                addRowCSV(train_set_f, tot_desc, img_class);
+                            } else {
+                                addRowCSV(test_set_f, tot_desc, img_class);
+                            }
+                        }
+
+                    }
+                }
             }
         }
-        if (!flag) {
-            Mat tot_desc(1, num_bins*(windows.size()-exclude_big_image), CV_32F);
+        else {
 
-            for (int w=exclude_big_image; w<windows.size(); w++) {
-                histogram[w].copyTo(tot_desc(Rect((w-exclude_big_image)*num_bins, 0, num_bins, 1)));
+            windows = getWindows(img, rows, cols);
+
+            cvtColor(img, img, COLOR_BGR2GRAY);
+
+            bool flag = false;
+
+            for (int w = exclude_big_image; w < windows.size(); w++) {
+                //Detect SIFT keypoints (or feature points)
+                detector->detect(img(windows[w]), keypoints);
+
+                //extract BoW (or BoF) descriptor from given image
+                bowDE.compute(img(windows[w]), keypoints, histogram[w]);
+                if (histogram[w].empty()) {
+                    //histogram[w] = Mat::zeros(1, 200, CV_32F);
+                    w = windows.size();
+                    flag = true;
+                }
             }
+            if (!flag) {
+                Mat tot_desc(1, num_bins * (windows.size() - exclude_big_image), CV_32F);
 
-            // insert the first n_images * proportion images into the train set, the rest into the test set
-            if (i < n_images * proportion) {
-                addRowCSV(train_set_f, tot_desc, img_class);
-            } else {
-                addRowCSV(test_set_f, tot_desc, img_class);
+                for (int w = exclude_big_image; w < windows.size(); w++) {
+                    histogram[w].copyTo(tot_desc(Rect((w - exclude_big_image) * num_bins, 0, num_bins, 1)));
+                }
+
+                // insert the first n_images * proportion images into the train set, the rest into the test set
+                if (i < n_images * proportion) {
+                    addRowCSV(train_set_f, tot_desc, img_class);
+                } else {
+                    addRowCSV(test_set_f, tot_desc, img_class);
+                }
             }
         }
 

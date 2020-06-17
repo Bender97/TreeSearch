@@ -12,7 +12,7 @@ double trainModel(string train_dataset_path, Ptr<ml::SVM> &svm)
 
     svm = ml::SVM::create();
     svm->setType(ml::SVM::NU_SVC);
-    svm->setNu(0.95);
+    svm->setNu(0.05);
     svm->setKernel(ml::SVM::RBF);
 
     svm->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 100000, 1e-6));

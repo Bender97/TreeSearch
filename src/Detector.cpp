@@ -14,7 +14,8 @@ void Detector::setClassifier(Ptr<ml::SVM> &classifier) {
 
 Mat Detector::detectTrees(Mat img) {
     //create a nearest neighbor matcher
-    Ptr<DescriptorMatcher> matcher(new FlannBasedMatcher);
+    //Ptr<DescriptorMatcher> matcher(new FlannBasedMatcher);
+    Ptr<DescriptorMatcher> matcher = BFMatcher::create(NORM_L2);
     //create Sift feature point detector
     Ptr<xfeatures2d::SIFT> detector = xfeatures2d::SIFT::create();
     //create BoF (or BoW) descriptor extractor
@@ -58,9 +59,9 @@ Mat Detector::detectTrees(Mat img) {
                     //extract BoW (or BoF) descriptor from given image
                     bowDE.compute(img(windows[w]), keypoints, histogram[w]);
                     if (histogram[w].empty()) {
-                        //histogram[w] = Mat::zeros(1, 200, CV_32F);
-                        w = windows.size();
-                        flag = true;
+                        histogram[w] = Mat::zeros(1, num_bins, CV_32F);
+                        /*w = windows.size();
+                        flag = true;*/
                     }
                 }
                 if (!flag) {
@@ -78,7 +79,7 @@ Mat Detector::detectTrees(Mat img) {
                         cout << "Te go visto nassare" << endl;
                     }
                 }
-                cout << x << "." << y << " result: " << flag << endl;
+                cout << x << "." << y << " flag: " << flag << endl;
 
                 Mat canvas = result.clone();
 

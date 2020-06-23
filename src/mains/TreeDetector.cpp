@@ -27,14 +27,16 @@ int main(int argc, char ** argv) {
     string vocabulary_path = parser.get<cv::String>("voc");
     string svm_path = parser.get<cv::String>("svm");
     string img_path = parser.get<cv::String>("img" );
+    bool verbose = parser.get<bool>("v" );
 
-    cout << "Loading vocabulary: " << vocabulary_path << endl;
+
+    if (verbose) cout << "Loading vocabulary: " << vocabulary_path << endl;
     Detector detector;
     detector.setVocabulary(loadYAML(vocabulary_path, DEFAULT_KEY));
-    cout << "Vocabulary correctly loaded" << endl << endl;
+    if (verbose) cout << "Vocabulary correctly loaded" << endl << endl;
 
 
-    cout << "Loading SVM model: " << svm_path << endl;
+    if (verbose)cout << "Loading SVM model: " << svm_path << endl;
     Ptr<ml::SVM> svm = ml::SVM::load(svm_path);
 
     if (svm->empty() || !svm->isTrained()) {
@@ -43,16 +45,16 @@ int main(int argc, char ** argv) {
     }
 
     detector.setClassifier(svm);
-    cout << "SVM model correctly loaded" << endl << endl;
+    if (verbose) cout << "SVM model correctly loaded" << endl << endl;
 
-    cout << "Loading image: " << img_path << endl;
+    if (verbose) cout << "Loading image: " << img_path << endl;
     Mat img = loadImage(img_path);
 
     if (img.empty()) {
         cout << "error loading image" << endl;
         return 1;
     }
-    cout << "Image correctly loaded" << endl << endl;
+    if (verbose) cout << "Image correctly loaded" << endl << endl;
 
     cout << "Starting tree detection" << endl;
 

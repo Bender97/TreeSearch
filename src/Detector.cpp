@@ -8,7 +8,7 @@ void Detector::setVocabulary(Mat vocabulary) {
     this->vocabulary = vocabulary;
 }
 
-void Detector::setClassifier(Ptr<ml::ANN_MLP> &classifier) {
+void Detector::setClassifier(Ptr<ml::SVM> &classifier) {
     this->classifier = classifier;
 }
 
@@ -47,7 +47,7 @@ Mat Detector::detectTrees(Mat img, bool verbose) {
     vector<int> classes;
     vector<float> scales;
 
-    for (int scale = 1; scale < 4; scale++) {
+    for (int scale = 1; scale < 5; scale++) {
         int w_size = min_size / scale;
 
         for (int x = 0; x <= img.cols - w_size; x += step) {

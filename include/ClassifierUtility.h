@@ -24,7 +24,7 @@ using namespace cv;
  * @param svm Class template instantiation reference of the model which will be trained
  * @return accuracy on train dataset
  */
-double trainModel(const string &train_dataset_path, Ptr<ml::ANN_MLP> & svm);
+double trainModel(const string &train_dataset_path, Ptr<ml::SVM> & svm);
 
 /**
  * @brief compute the test error of a SVM model

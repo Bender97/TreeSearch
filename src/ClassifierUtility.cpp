@@ -1,33 +1,22 @@
+
 //
 // Created by cogny on 14/06/20.
 //
 
 #include "../include/ClassifierUtility.h"
 
-double trainModel(const string &train_dataset_path, Ptr<ml::ANN_MLP> &ann)
+double trainModel(const string &train_dataset_path, Ptr<ml::SVM> &svm)
 {
     pair<Mat, Mat> dataset = loadDataset(train_dataset_path);
 
-    int nfeatures = dataset.first.cols;
-    ann = ml::ANN_MLP::create();
-    Mat_<int> layers(4,1);
-    layers(0) = nfeatures;     // input
-    layers(1) = 3 * 512;  // hidden
-    layers(2) = 3 * 128;  // hidden
-    layers(3) = 3;      // output, 1 pin per class.
-    ann->setLayerSizes(layers);
-    ann->setActivationFunction(ml::ANN_MLP::SIGMOID_SYM,0,0);
-    ann->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER+TermCriteria::EPS, 300, 0.0001));
-    ann->setTrainMethod(ml::ANN_MLP::BACKPROP, 0.0001);
+    Ptr<ml::TrainData> td = ml::TrainData::create(dataset.first, ml::ROW_SAMPLE, dataset.second);
 
-    Mat train_classes = Mat::zeros(dataset.first.rows, 3, CV_32FC1);
-    for(int i=0; i<train_classes.rows; i++)
-    {
-        train_classes.at<float>(i, dataset.second.at<int>(i)) = 1.f;
-    }
-    cerr << dataset.first.size() << " " << train_classes.size() << endl;
-
-    ann->train(dataset.first, ml::ROW_SAMPLE, train_classes);
+    svm = ml::SVM::create();
+    svm->setType(ml::SVM::NU_SVC);
+    svm->setNu(0.05);
+    svm->setKernel(ml::SVM::CHI2);
+    svm->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 100000, 1e-6));
+    svm->trainAuto(td);
 
     /** COMPUTE TRAIN ERROR **/
     int error = 0;
@@ -35,13 +24,13 @@ double trainModel(const string &train_dataset_path, Ptr<ml::ANN_MLP> &ann)
     for (int r=0; r<dataset.first.rows; r++) {
         Mat hist = dataset.first.row(r);
 
-        int response = (int) ann->predict(hist);
+        int response = (int) svm->predict(hist);
         int result = round(response);
         if (result!=dataset.second.at<int>(r))
             error++;
     }
 
-	return (double) error/dataset.second.rows;
+    return (double) error/dataset.second.rows;
 }
 
 double testModel(const string &test_dataset_path, Ptr<ml::SVM> svm)

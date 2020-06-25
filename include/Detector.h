@@ -19,7 +19,7 @@ using namespace cv;
 class Detector {
 public:
     Mat vocabulary;                                 // vocabulary of the BoW
-    Ptr<ml::ANN_MLP> classifier;                        // SVM classifier
+    Ptr<ml::SVM> classifier;                        // SVM classifier
 
     /**
      * @brief set the vocabulary to use
@@ -31,7 +31,7 @@ public:
      * @brief set the classifier model to use
      * @param classifier SVM classifier
      */
-    void setClassifier(Ptr<ml::ANN_MLP> &classifier);
+    void setClassifier(Ptr<ml::SVM> &classifier);
 
     /**
      * @brief look for trees in the img

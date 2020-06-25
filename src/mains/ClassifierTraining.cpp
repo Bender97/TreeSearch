@@ -25,14 +25,13 @@ int main(int argc, char ** argv) {
     string train_path = parser.get<cv::String>("train");
     string svm_path = parser.get<cv::String>("svm");
 
-    //Ptr<ml::SVM> svm;
-    Ptr<ml::ANN_MLP> svm;
+    Ptr<ml::SVM> svm;
 
     cout << "Training started" << endl;
 
     cout << "Training error of the SVM model: " << trainModel(train_path, svm) << endl;
-    //writeSVMModel(svm_path, svm);
-    svm->save("../data/model/ann.yml");
+    writeSVMModel(svm_path, svm);
+//    svm->save("../data/model/ann.yml");
 
 
     cout << "SVM model stored at " << svm_path << endl;

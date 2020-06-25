@@ -49,7 +49,7 @@ public:
      * @return final bounding boxes found and filtered
      */
     static vector<Rect> unifyRegions(vector<Rect> regions, vector<int> classes, float max_span, float score_threshold);
-    //static vector<Rect> unifyRegionsClustering(vector<Rect> regions, vector<int> classes, float dist_threshold, float score_threshold);
+    static vector<Rect> unifyRegionsClustering(vector<Rect> regions, vector<int> classes, float c, float win_size, float shift_threshold, float score_threshold);
 
     /**
      * @brief determine if a point is inside a rect

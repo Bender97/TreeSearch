@@ -8,7 +8,7 @@ void Detector::setVocabulary(Mat vocabulary) {
     this->vocabulary = vocabulary;
 }
 
-void Detector::setClassifier(Ptr<ml::SVM> &classifier) {
+void Detector::setClassifier(Ptr<ml::ANN_MLP> &classifier) {
     this->classifier = classifier;
 }
 
@@ -25,7 +25,6 @@ Mat Detector::detectTrees(Mat img, bool verbose) {
 
     Mat canv_result = img.clone();
     Mat result = img.clone();
-
 
     cvtColor(img, img, COLOR_BGR2GRAY);
 
@@ -56,8 +55,6 @@ Mat Detector::detectTrees(Mat img, bool verbose) {
 
                 windows = getFrames(rows, cols, x, y, w_size);
 
-                bool flag = false;
-
                 for (int w=0; w<windows.size(); w++) {
                     //Detect SIFT keypoints (or feature points)
                     detector->detect(img(windows[w]), keypoints);
@@ -66,29 +63,30 @@ Mat Detector::detectTrees(Mat img, bool verbose) {
                     bowDE.compute(img(windows[w]), keypoints, histogram[w]);
                     if (histogram[w].empty())
                         histogram[w] = Mat::zeros(1, num_bins, CV_32F);
+                }
 
-                    Mat tot_desc(1, num_bins*windows.size(), CV_32F);
+                Mat tot_desc(1, num_bins * windows.size(), CV_32F);
 
-                    for (int w=0; w<windows.size(); w++) {
-                        histogram[w].copyTo(tot_desc(Rect(w*num_bins, 0, num_bins, 1)));
-                    }
-                    int response = (int) this->classifier->predict(tot_desc);
+                for (int w = 0; w < windows.size(); w++) {
+                    histogram[w].copyTo(tot_desc(Rect(w * num_bins, 0, num_bins, 1)));
+                }
+                int response = (int) this->classifier->predict(tot_desc);
 
 
-                    if (response == TREE_CLASS) {
-                        rectangle(canv_result, windows[0], {255, 0, 255}, scale);
+                if (response == TREE_CLASS) {
+                    rectangle(canv_result, windows[0], {255, 0, 255}, scale);
 
-                        regions.push_back(windows[0]);
-                        classes.push_back(TREE_CLASS);
-                        scales.push_back(scale);
-                    }
-                    else if (response == MAYBE_TREE_CLASS) {
-                        rectangle(canv_result, windows[0], { 0, 255, 0 }, scale);
+                    regions.push_back(windows[0]);
+                    classes.push_back(TREE_CLASS);
+                    scales.push_back(scale);
+                } else if (response == MAYBE_TREE_CLASS) {
+                    rectangle(canv_result, windows[0], {0, 255, 0}, scale);
 
-                        regions.push_back(windows[0]);
-                        classes.push_back(MAYBE_TREE_CLASS);
-                        scales.push_back(scale);
-                    }
+                    regions.push_back(windows[0]);
+                    classes.push_back(MAYBE_TREE_CLASS);
+                    scales.push_back(scale);
+                }
+
 
                 if(verbose) {
                     cout << "analyzing: " << x << "." << y << endl;
@@ -119,7 +117,8 @@ Mat Detector::detectTrees(Mat img, bool verbose) {
     return result;
 }
 
-vector<Rect> Detector::unifyRegions(vector<Rect> regions, vector<int> classes, float max_span, float score_threshold) {
+vector<Rect> Detector::unifyRegions(vector<Rect> regions, vector<int> classes, float max_span, float score_threshold)
+{
 
     vector<Point2i> sums_tl_regions;
     vector<Point2i> sums_br_regions;
@@ -316,7 +315,7 @@ bool Detector::isInsideRect(Point2i pt, Rect rect) {
 
     Point2i tl = rect.tl();
     Point2i br = rect.br();
-    
+
     return (tl.x <= pt.x && pt.x <= br.x) && (tl.y <= pt.y && pt.y <= br.y);
 
 }

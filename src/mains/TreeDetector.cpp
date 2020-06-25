@@ -37,7 +37,8 @@ int main(int argc, char ** argv) {
 
 
     if (verbose)cout << "Loading SVM model: " << svm_path << endl;
-    Ptr<ml::SVM> svm = ml::SVM::load(svm_path);
+    //Ptr<ml::SVM> svm = ml::SVM::load(svm_path);
+    Ptr<ml::ANN_MLP> svm = ml::ANN_MLP::load("../data/model/ann.yml");
 
     if (svm->empty() || !svm->isTrained()) {
         cout << "problem loading svmModel provided with path:" << endl << svm_path << endl;

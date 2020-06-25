@@ -84,6 +84,8 @@ void buildTrainingSet(string input_images_path, Mat vocabulary, string output_CS
     /*** VOCABULARY PARAMETER ***/
     int num_bins = vocabulary.rows;
 
+    cout << "the vocabulary has " << num_bins << " bags" << endl;
+
     vector<Rect> windows;
     vector<Mat> histogram(rows*cols + 1);
 
@@ -92,57 +94,58 @@ void buildTrainingSet(string input_images_path, Mat vocabulary, string output_CS
         Mat img = imread(images_paths[i].first);
         int img_class = images_paths[i].second;
 
-        cvtColor(img, img, COLOR_BGR2GRAY);
+        try {
+            cvtColor(img, img, COLOR_BGR2GRAY);
+            int min_size = min(img.rows, img.cols);
+            int step = min_size/3;
 
-        int min_size = min(img.rows, img.cols);
-        int step = min_size/3;
+            if (img_class == NON_TREE_CLASS) {
+                int w_size = min_size;
 
-        if (img_class == NON_TREE_CLASS) {
-            int w_size = min_size;
+                /** sliding window approach **/
+                for (int x = 0; x <= img.cols - w_size; x += step) {
+                    for (int y = 0; y <= img.rows - w_size; y += step) {
 
-            for (int x = 0; x <= img.cols - w_size; x += step) {
-                for (int y = 0; y <= img.rows - w_size; y += step) {
+                        windows = getFrames(rows, cols, x, y, w_size);
 
-                    windows = getFrames(rows, cols, x, y, w_size);
+                        for (int w=0; w<windows.size(); w++) {
+                            //Detect SIFT keypoints (or feature points)
+                            detector->detect(img(windows[w]), keypoints);
 
-                    for (int w=0; w<windows.size(); w++) {
-                        //Detect SIFT keypoints (or feature points)
-                        detector->detect(img(windows[w]), keypoints);
+                            //extract BoW (or BoF) descriptor from given image
+                            bowDE.compute(img(windows[w]), keypoints, histogram[w]);
+                            if (histogram[w].empty())
+                                histogram[w] = Mat::zeros(1, num_bins, CV_32F);
+                        }
 
-                        //extract BoW (or BoF) descriptor from given image
-                        bowDE.compute(img(windows[w]), keypoints, histogram[w]);
-                        if (histogram[w].empty())
-                            histogram[w] = Mat::zeros(1, num_bins, CV_32F);
+                        Mat tot_desc(1, num_bins*windows.size(), CV_32F);
+
+                        for (int w=0; w<windows.size(); w++)
+                            histogram[w].copyTo(tot_desc(Rect(w*num_bins, 0, num_bins, 1)));
+
+                        // insert the first n_images * proportion images into the train set, the rest into the test set
+                        if (i < n_images * proportion) {
+                            addRowCSV(train_set_f, tot_desc, img_class);
+                        } else {
+                            addRowCSV(test_set_f, tot_desc, img_class);
+                        }
                     }
 
-                    Mat tot_desc(1, num_bins*windows.size(), CV_32F);
-
-                    for (int w=0; w<windows.size(); w++)
-                        histogram[w].copyTo(tot_desc(Rect(w*num_bins, 0, num_bins, 1)));
-
-                    // insert the first n_images * proportion images into the train set, the rest into the test set
-                    if (i < n_images * proportion) {
-                        addRowCSV(train_set_f, tot_desc, img_class);
-                    } else {
-                        addRowCSV(test_set_f, tot_desc, img_class);
-                    }
                 }
-
             }
-        }
-        else {
+            else {
 
-            windows = getWindows(img, rows, cols);
+                windows = getWindows(img, rows, cols);
 
-            for (int w = 0; w < windows.size(); w++) {
-                //Detect SIFT keypoints (or feature points)
-                detector->detect(img(windows[w]), keypoints);
+                for (int w = 0; w < windows.size(); w++) {
+                    //Detect SIFT keypoints (or feature points)
+                    detector->detect(img(windows[w]), keypoints);
 
-                //extract BoW (or BoF) descriptor from given image
-                bowDE.compute(img(windows[w]), keypoints, histogram[w]);
-                if (histogram[w].empty())
-                    histogram[w] = Mat::zeros(1, num_bins, CV_32F);
-
+                    //extract BoW (or BoF) descriptor from given image
+                    bowDE.compute(img(windows[w]), keypoints, histogram[w]);
+                    if (histogram[w].empty())
+                        histogram[w] = Mat::zeros(1, num_bins, CV_32F);
+                }
                 Mat tot_desc(1, num_bins * windows.size(), CV_32F);
 
                 for (int w = 0; w < windows.size(); w++)
@@ -154,8 +157,15 @@ void buildTrainingSet(string input_images_path, Mat vocabulary, string output_CS
                 } else {
                     addRowCSV(test_set_f, tot_desc, img_class);
                 }
+
             }
         }
+        catch( cv::Exception& e )
+        {
+
+        }
+
+
 
         cout << to_string((int)((float)(i + 1) / n_images * 100)) << "% completed" << endl;
     }

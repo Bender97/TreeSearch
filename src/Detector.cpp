@@ -106,9 +106,9 @@ Mat Detector::detectTrees(Mat img, bool verbose) {
         }
     }
 
-    //vector<Rect> unified_regs = unifyRegions(regions, classes, 1.8, 0.6);
+    // post processing of the classified regions
     vector<Rect> unified_regs = unifyRegionsClustering(regions, classes, 0.01, 100, 2, 0.02);
-
+    // draw the output regions on the resulting image
     for (auto region : unified_regs) {
 
         rectangle(result, region, { 0, 0, 255 }, 2);
@@ -118,111 +118,6 @@ Mat Detector::detectTrees(Mat img, bool verbose) {
     return result;
 }
 
-vector<Rect> Detector::unifyRegions(vector<Rect> regions, vector<int> classes, float max_span, float score_threshold)
-{
-
-    vector<Point2i> sums_tl_regions;
-    vector<Point2i> sums_br_regions;
-    vector<float> n_regs_unified;
-
-    // for each region
-    for (int i = 0; i < regions.size(); i++)
-    {
-
-        bool found = false;
-        Point2i reg_tl = regions[i].tl();
-        Point2i reg_br = regions[i].br();
-
-        // count trees 4 times and maybe_trees 1 time
-        float mult = classes[i] == TREE_CLASS ? 100 : 1;
-
-        // for each output region until found (if found!)
-        for (int j = 0; j < sums_tl_regions.size() && !found; j++)
-        {
-
-            // get the tl point of the out region and its max_span rectangle
-            Point2i out_reg_tl = sums_tl_regions[j] / n_regs_unified[j];
-            Point2i out_reg_br = sums_br_regions[j] / n_regs_unified[j];
-
-            // get the out region size scaled by max_span
-            int span_size = (out_reg_br.x - out_reg_tl.x) * max_span;
-
-            Rect out_span(out_reg_tl - Point2i(span_size / 2, span_size / 2), Size(span_size, span_size));
-            Rect out_reg(out_reg_tl, out_reg_br);
-
-            // if the current region tl is inside the max span of the out region
-            // or the current region is inside the out region
-            // then count it in
-            if (isInsideRect(reg_tl, out_span) || isInsideRect(regions[i], out_reg)) {
-
-                if (isInsideRect(reg_tl, out_span)) cout << "inside span" << endl;
-                else cout << "inside region" << endl;
-
-                found = true;
-                // weight also by scale wrt the output region
-                cout << "region is of size = " << regions[i].size() << endl;
-                cout << "out region is of size = " << out_reg.size() << endl;
-                float scale = ((float)regions[i].size().height / out_reg.size().height);
-                mult *= pow(scale, 5);
-
-                cout << "region number: " << j << endl;
-
-                cout << "scale is = " << pow(scale, 5) << endl;
-                cout << "mult is = " << mult << endl;
-
-                // update the output region
-                sums_tl_regions[j] += reg_tl * mult;
-                sums_br_regions[j] += reg_br * mult;
-                n_regs_unified[j] += mult;
-
-
-            }
-
-        }
-
-        // if no output region was found to unify
-        if (!found)
-        {
-
-            cout << "new region!" << endl;
-
-            // create a new output region
-            sums_tl_regions.push_back(reg_tl * mult);
-            sums_br_regions.push_back(reg_br * mult);
-            n_regs_unified.push_back(mult);
-
-        }
-    }
-
-    float max_mult = 0;
-    // max score computation (the region with max multiplicity will have score 1)
-    for (int i = 0; i < n_regs_unified.size(); i++)
-    {
-
-        if (n_regs_unified[i] > max_mult)
-        {
-            max_mult = n_regs_unified[i];
-        }
-    }
-
-    vector<Rect> out_regions(sums_tl_regions.size());
-
-    for (int i = 0; i < sums_tl_regions.size(); i++)
-    {
-
-        float score = n_regs_unified[i] / max_mult;
-
-        cout << "score: " << score << endl;
-
-        // if the region passes the non maxima suppression add it to the final regions
-        if (score >= score_threshold)
-            out_regions[i] = Rect(sums_tl_regions[i] / n_regs_unified[i], sums_br_regions[i] / n_regs_unified[i]);
-
-    }
-
-    return out_regions;
-
-}
 
 vector<Rect> Detector::unifyRegionsClustering(vector<Rect> regions, vector<int> classes, float c, float win_size, float shift_threshold, float score_threshold) {
 
@@ -256,6 +151,7 @@ vector<Rect> Detector::unifyRegionsClustering(vector<Rect> regions, vector<int> 
     // radius of region by x and y, height and width of the region
     vector<Point2i> out_centers;
     vector<float> n_regs_unified;
+    vector<float> tree_rank;
     vector<float> radius_x;
     vector<float> radius_y;
     vector<int> heights;
@@ -275,7 +171,7 @@ vector<Rect> Detector::unifyRegionsClustering(vector<Rect> regions, vector<int> 
         float diff_x;
         float diff_y;
         // window size to consider
-        float win_size = scales[i] / 2;
+        float win_size = scales[i] / 4;
 
         do
         {
@@ -331,26 +227,41 @@ vector<Rect> Detector::unifyRegionsClustering(vector<Rect> regions, vector<int> 
                 found_peak = true;
                 n_regs_unified[j] += multiplicity[i];
 
-                float dx_radius = abs(reg_pts[i].x - out_centers[j].x);
-                float dy_radius = abs(reg_pts[i].y - out_centers[j].y);
+                if (tree_rank[j] <= multiplicity[i])
+                {
 
-                if (dx_radius > radius_x[j]) {
-                    radius_x[j] = dx_radius;
-                    widths[j] = dx_radius + scales[i] / 2;
-                }
-                if (dy_radius > radius_y[j]) {
-                    radius_y[j] = dy_radius;
-                    heights[j] = dy_radius + scales[i] / 2;
-                }
+                    float dx_radius = abs(reg_pts[i].x - out_centers[j].x);
+                    float dy_radius = abs(reg_pts[i].y - out_centers[j].y);
 
+                    if (tree_rank[j] < multiplicity[i])
+                    {
+                        // if the tree rank is upgraded, force the update
+                        tree_rank[j] = multiplicity[i];
+                        radius_x[j] = dx_radius;
+                        widths[j] = (dx_radius + scales[i] / 2) * 2;
+                        radius_y[j] = dy_radius;
+                        heights[j] = (dy_radius + scales[i] / 2) * 2;
+                    }
+                    else
+                    {
+                        if (dx_radius > radius_x[j]) {
+                            radius_x[j] = dx_radius;
+                            widths[j] = (dx_radius + scales[i] / 2) * 2;
+                        }
+                        if (dy_radius > radius_y[j]) {
+                            radius_y[j] = dy_radius;
+                            heights[j] = (dy_radius + scales[i] / 2) * 2;
+                        }
+                    }
+                }
             }
-
         }
         // if a new peak was found, add it
         if (!found_peak)
         {
             out_centers.push_back(Point2i(p_x, p_y));
             n_regs_unified.push_back(multiplicity[i]);
+            tree_rank.push_back(multiplicity[i]);
             heights.push_back(scales[i]);
             widths.push_back(scales[i]);
             radius_x.push_back(0);
@@ -358,6 +269,87 @@ vector<Rect> Detector::unifyRegionsClustering(vector<Rect> regions, vector<int> 
         }
 
     }
+    
+    // step 3: merge output regions that belongs to the same tree but have different centers
+    // move the number of regions unified from an output region to the other when merged, and
+    // never consider it again
+    for (int i = 0; i < n_regs_unified.size(); i++)
+    {
+        // don't consider merged regions
+        if (n_regs_unified[i] != 0)
+        {
+            // compute the range from the size of the output region
+            int min_size_i = min(heights[i], widths[i]);
+            int range = min_size_i / 4;
+
+            for (int j = 0; j < n_regs_unified.size(); j++) {
+
+                if (i != j && n_regs_unified[j] != 0)
+                {
+
+                    int dx_radius = abs(out_centers[i].x - out_centers[j].x);
+                    int dy_radius = abs(out_centers[i].y - out_centers[j].y);
+
+                    if (dx_radius <= range && dy_radius <= range)
+                    {
+                        // take the weighted average of the sizes
+                        widths[i] = (n_regs_unified[i] * widths[i] + n_regs_unified[j] * widths[j]) / (n_regs_unified[i] + n_regs_unified[j]);
+                        heights[i] = (n_regs_unified[i] * heights[i] + n_regs_unified[j] * heights[j]) / (n_regs_unified[i] + n_regs_unified[j]);
+                        // move the weight to the receiver region
+                        n_regs_unified[i] += n_regs_unified[j];
+                        n_regs_unified[j] = 0;
+                    }
+                }
+            }
+        }
+    }
+
+    // step 4: merge output regions that are contained in one another
+    for (int i = 0; i < n_regs_unified.size(); i++)
+    {
+        if (n_regs_unified[i] != 0)
+        {
+
+            int min_size_i = min(heights[i], widths[i]);
+            int range = min_size_i / 4;
+
+            for (int j = 0; j < n_regs_unified.size(); j++) {
+
+                if (i != j && n_regs_unified[j] != 0)
+                {
+                    // compute boundaries
+                    int left_x_i = out_centers[i].x - widths[i] / 2;
+                    int right_x_i = out_centers[i].x + widths[i] / 2;
+                    int upper_y_i = out_centers[i].y - heights[i] / 2;
+                    int lower_y_i = out_centers[i].y + heights[i] / 2;
+
+                    int left_x_j = out_centers[j].x - widths[j] / 2;
+                    int right_x_j = out_centers[j].x + widths[j] / 2;
+                    int upper_y_j = out_centers[j].y - heights[j] / 2;
+                    int lower_y_j = out_centers[j].y + heights[j] / 2;
+
+                    bool is_inside =    (left_x_i <= left_x_j && right_x_j <= right_x_i &&
+                                        upper_y_i <= upper_y_j && lower_y_j <= lower_y_i) ||
+                                        (left_x_j <= left_x_i && right_x_i <= right_x_j &&
+                                        upper_y_j <= upper_y_i && lower_y_i <= lower_y_j);
+                    
+                    if (is_inside)
+                    {
+                        // take the max size because the bigger region will prevail on the smaller
+                        widths[i] = max(widths[i], widths[j]);
+                        heights[i] = max(heights[i], heights[j]);
+                        // move the weight to the receiver region
+                        n_regs_unified[i] += n_regs_unified[j];
+                        n_regs_unified[j] = 0;
+
+                    }
+                }
+            }
+        }
+    }
+
+    // step 6: take the maximum weight and compute the score of each output region
+    // for non-maxima suppression
 
     float max_mult = 0;
     // max score computation (the region with max multiplicity will have score 1)
@@ -392,24 +384,5 @@ vector<Rect> Detector::unifyRegionsClustering(vector<Rect> regions, vector<int> 
     }
 
     return out_regions;
-
-}
-
-
-bool Detector::isInsideRect(Point2i pt, Rect rect) {
-
-    Point2i tl = rect.tl();
-    Point2i br = rect.br();
-
-    return (tl.x <= pt.x && pt.x <= br.x) && (tl.y <= pt.y && pt.y <= br.y);
-
-}
-
-bool Detector::isInsideRect(Rect inside, Rect rect) {
-
-    Point2i tl_inside = inside.tl();
-    Point2i br_inside = inside.br();
-
-    return isInsideRect(tl_inside, rect) && isInsideRect(br_inside, rect);
 
 }

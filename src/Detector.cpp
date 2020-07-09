@@ -107,7 +107,7 @@ Mat Detector::detectTrees(Mat img, bool verbose) {
     }
 
     // post processing of the classified regions
-    vector<Rect> unified_regs = unifyRegionsClustering(regions, classes, 0.01, 100, 2, 0.02);
+    vector<Rect> unified_regs = unifyRegionsClustering(regions, classes, 0.01, 2, 0.02);
     // draw the output regions on the resulting image
     for (auto region : unified_regs) {
 
@@ -119,7 +119,7 @@ Mat Detector::detectTrees(Mat img, bool verbose) {
 }
 
 
-vector<Rect> Detector::unifyRegionsClustering(vector<Rect> regions, vector<int> classes, float c, float win_size, float shift_threshold, float score_threshold) {
+vector<Rect> Detector::unifyRegionsClustering(vector<Rect> regions, vector<int> classes, float c, float shift_threshold, float score_threshold) {
 
     int reg_num = regions.size();
 

@@ -44,12 +44,12 @@ public:
      * @brief suppress all spammed bounding box to select only suitable ones
      * @param regions Bounding Boxes found
      * @param classes Classes the classifier can recognize
-     * @param max_span Scaling factor of the resulting outer region
+     * @param c Scaling factor of normal kernel in the mean shift
+     * @param shift_threshold Threshold to stop when the shift is smaller than shift_threshold
      * @param score_threshold Threshold to select eligible windows
      * @return final bounding boxes found and filtered
      */
-    static vector<Rect> unifyRegions(vector<Rect> regions, vector<int> classes, float max_span, float score_threshold);
-    static vector<Rect> unifyRegionsClustering(vector<Rect> regions, vector<int> classes, float c, float win_size, float shift_threshold, float score_threshold);
+    static vector<Rect> unifyRegionsClustering(vector<Rect> regions, vector<int> classes, float c, float shift_threshold, float score_threshold);
 
     /**
      * @brief determine if a point is inside a rect
